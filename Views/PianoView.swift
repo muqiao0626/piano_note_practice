@@ -14,7 +14,7 @@ struct PianoView: View {
                     let x = CGFloat(index) * width
                     
                     PianoKey(note: note, isBlack: false) {
-                        // AudioManager.shared.play(note: note)
+                        AudioManager.shared.play(note: note)
                         engine.check(note: note)
                     }
                     .frame(width: width, height: height)
@@ -30,7 +30,7 @@ struct PianoView: View {
                     let xPos = calculateBlackKeyXPosition(for: note, whiteKeyWidth: whiteKeyWidth)
                     
                     PianoKey(note: note, isBlack: true) {
-                        // AudioManager.shared.play(note: note)
+                        AudioManager.shared.play(note: note)
                         engine.check(note: note)
                     }
                     .frame(width: width, height: height)

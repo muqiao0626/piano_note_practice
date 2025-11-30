@@ -19,7 +19,9 @@ class GameEngine: ObservableObject {
         
         var newNote: Note
         repeat {
-            let octave = Int.random(in: 3...5)
+            // Reduce C5 bias by making it a separate low-probability event
+            let includeC5 = Double.random(in: 0...1) < 0.05 // 5% chance of C5
+            let octave = includeC5 ? 5 : Int.random(in: 3...4)
             let name = NoteName.allCases.randomElement()!
             let accidental = Accidental.allCases.randomElement()!
             
@@ -50,8 +52,6 @@ class GameEngine: ObservableObject {
         
         feedbackMessage = "Press the key!"
         feedbackColor = .primary
-        
-        // Audio removed as requested.
     }
     
     func check(note: Note) {
