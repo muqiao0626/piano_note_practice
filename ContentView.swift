@@ -131,7 +131,7 @@ struct PracticeView: View {
                     // Reset timer after GameEngine generates new note (0.5s delay in GameEngine)
                     timerSubscription?.invalidate()
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                        sessionTimer = 60
+                        sessionTimer = 30
                         startSessionTimer()
                     }
                 }
@@ -155,7 +155,7 @@ struct PracticeView: View {
                     session.endPractice()
                 } else {
                     // Reset timer and generate new note
-                    sessionTimer = 60
+                    sessionTimer = 30
                     engine.generateNote()
                     startSessionTimer()
                 }
@@ -171,7 +171,7 @@ struct PracticeView: View {
         if session.isPracticeComplete {
             session.endPractice()
         } else {
-            sessionTimer = 60
+            sessionTimer = 30
             engine.generateNote()
             startSessionTimer()
         }

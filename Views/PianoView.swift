@@ -14,6 +14,7 @@ struct PianoView: View {
                     let x = CGFloat(index) * width
                     
                     PianoKey(note: note, isBlack: false) {
+                        // AudioManager.shared.play(note: note)
                         engine.check(note: note)
                     }
                     .frame(width: width, height: height)
@@ -29,6 +30,7 @@ struct PianoView: View {
                     let xPos = calculateBlackKeyXPosition(for: note, whiteKeyWidth: whiteKeyWidth)
                     
                     PianoKey(note: note, isBlack: true) {
+                        // AudioManager.shared.play(note: note)
                         engine.check(note: note)
                     }
                     .frame(width: width, height: height)
@@ -43,6 +45,9 @@ struct PianoView: View {
     
     var whiteKeys: [Note] {
         var keys: [Note] = []
+        // Add B2 at the lower end
+        keys.append(Note(name: .B, octave: 2, accidental: .natural, clef: .bass, duration: .quarter))
+        
         for octave in 3...4 {
             for name in NoteName.allCases {
                 keys.append(Note(name: name, octave: octave, accidental: .natural, clef: .treble, duration: .quarter))
@@ -75,10 +80,10 @@ struct PianoView: View {
         default: break
         }
         
-        baseIndex += (note.octave - 3) * 7
+        // Account for B2 at index 0, so octave 3 starts at index 1
+        baseIndex += (note.octave - 3) * 7 + 1
         
         // Center of the black key is at the boundary of the white keys.
-        // Boundary is at (baseIndex + 1) * whiteKeyWidth
         return CGFloat(baseIndex + 1) * whiteKeyWidth
     }
 }
