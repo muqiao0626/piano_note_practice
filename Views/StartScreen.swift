@@ -11,13 +11,13 @@ struct StartScreen: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
             
-            Text("Select Practice Duration")
+            Text("Select Number of Notes")
                 .font(.title2)
                 .foregroundColor(.secondary)
             
-            Picker("Duration", selection: $session.selectedDuration) {
-                ForEach(session.durationOptions, id: \.self) { duration in
-                    Text("\(duration) min").tag(duration)
+            Picker("Note Count", selection: $session.selectedNoteCount) {
+                ForEach(session.noteCountOptions, id: \.self) { count in
+                    Text("\(count) notes").tag(count)
                 }
             }
             .pickerStyle(.segmented)

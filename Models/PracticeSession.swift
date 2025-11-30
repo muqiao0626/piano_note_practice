@@ -9,20 +9,18 @@ enum AppState {
 
 class PracticeSession: ObservableObject {
     @Published var appState: AppState = .start
-    @Published var selectedDuration: Int = 10 // minutes
+    @Published var selectedNoteCount: Int = 20 // number of notes to practice
     @Published var totalSessions: Int = 0
     @Published var correctSessions: Int = 0
-    @Published var practiceStartTime: Date?
-    @Published var practiceEndTime: Date?
+    @Published var currentSession: Int = 0
     
-    let durationOptions = [10, 20, 30, 40, 50, 60]
+    let noteCountOptions = [20, 40, 60, 80, 100]
     
     func startPractice() {
         appState = .practice
         totalSessions = 0
         correctSessions = 0
-        practiceStartTime = Date()
-        practiceEndTime = Date().addingTimeInterval(TimeInterval(selectedDuration * 60))
+        currentSession = 0
     }
     
     func endPractice() {
@@ -33,17 +31,14 @@ class PracticeSession: ObservableObject {
         appState = .start
         totalSessions = 0
         correctSessions = 0
-        practiceStartTime = nil
-        practiceEndTime = nil
+        currentSession = 0
     }
     
-    var isPracticeTimeUp: Bool {
-        guard let endTime = practiceEndTime else { return false }
-        return Date() >= endTime
+    var isPracticeComplete: Bool {
+        return currentSession >= selectedNoteCount
     }
     
-    var remainingPracticeTime: TimeInterval {
-        guard let endTime = practiceEndTime else { return 0 }
-        return max(0, endTime.timeIntervalSinceNow)
+    var remainingSessions: Int {
+        return max(0, selectedNoteCount - currentSession)
     }
 }

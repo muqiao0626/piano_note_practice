@@ -24,15 +24,15 @@ struct PracticeView: View {
     @Binding var showDebug: Bool
     @Binding var bassClefOffset: CGFloat
     
-    @State private var practiceTimer: Timer?
-    @State private var sessionTimer: Int = 60
+    @State private var sessionTimer: Int = 30
+    @State private var timerSubscription: Timer?
     
     var body: some View {
         VStack {
             // Header with Timer and Controls
             HStack {
-                Text("Score: \(engine.score)")
-                    .font(.title)
+                Text("Session: \(session.currentSession + 1)/\(session.selectedNoteCount)")
+                    .font(.title2)
                     .padding()
                 
                 Spacer()
@@ -42,7 +42,7 @@ struct PracticeView: View {
                     Text("\(sessionTimer)s")
                         .font(.system(size: 32, weight: .bold))
                         .foregroundColor(sessionTimer <= 10 ? .red : .primary)
-                    Text("Session Time")
+                    Text("Time Left")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -97,7 +97,7 @@ struct PracticeView: View {
                 }
                 
                 Button(action: {
-                    practiceTimer?.invalidate()
+                    timerSubscription?.invalidate()
                     session.endPractice()
                 }) {
                     Text("End Practice")
@@ -113,42 +113,67 @@ struct PracticeView: View {
         }
         .onAppear {
             startSessionTimer()
-            startPracticeTimer()
         }
         .onDisappear {
-            practiceTimer?.invalidate()
+            timerSubscription?.invalidate()
+        }
+        .onChange(of: engine.feedbackMessage) { newValue in
+            if newValue.contains("Correct") {
+                // User got it right - move to next session
+                session.correctSessions += 1
+                session.totalSessions += 1
+                session.currentSession += 1
+                
+                if session.isPracticeComplete {
+                    timerSubscription?.invalidate()
+                    session.endPractice()
+                } else {
+                    // Reset timer after GameEngine generates new note (0.5s delay in GameEngine)
+                    timerSubscription?.invalidate()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        sessionTimer = 60
+                        startSessionTimer()
+                    }
+                }
+            }
         }
         .frame(minWidth: 600, minHeight: 500)
         .background(Color.white)
     }
     
     private func startSessionTimer() {
-        sessionTimer = 60
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+        timerSubscription = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
             if sessionTimer > 0 {
                 sessionTimer -= 1
             } else {
+                // Time's up - mark as incorrect and move to next
                 timer.invalidate()
-                // Auto-advance to next note
                 session.totalSessions += 1
-                engine.generateNote()
-                startSessionTimer()
+                session.currentSession += 1
+                
+                if session.isPracticeComplete {
+                    session.endPractice()
+                } else {
+                    // Reset timer and generate new note
+                    sessionTimer = 60
+                    engine.generateNote()
+                    startSessionTimer()
+                }
             }
         }
     }
     
     private func skipSession() {
+        timerSubscription?.invalidate()
         session.totalSessions += 1
-        engine.generateNote()
-        startSessionTimer()
-    }
-    
-    private func startPracticeTimer() {
-        practiceTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if session.isPracticeTimeUp {
-                practiceTimer?.invalidate()
-                session.endPractice()
-            }
+        session.currentSession += 1
+        
+        if session.isPracticeComplete {
+            session.endPractice()
+        } else {
+            sessionTimer = 60
+            engine.generateNote()
+            startSessionTimer()
         }
     }
 }
